@@ -1,18 +1,35 @@
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../redux/store'
 import { logout, profile } from '../../redux/logics/consumerSlice'
-import { Box, Container, Flex, Image, Input, Button, Space } from '@mantine/core'
+import { Container, Flex, Image, Input, Button, Space } from '@mantine/core'
 import { IconSearch, IconCategory, IconSchema, IconShoppingCart, IconUser, IconHeart } from '@tabler/icons'
+import Megamenu from '../../comps/megamenu'
 
-export default function Index() {
+export async function getStaticProps() {
+
+    try {
+        const raw = await fetch(process.env.NEXT_PUBLIC_BASE_URL + 'procedure/categories')
+        const { data } = await raw.json()
+        
+        return {
+            props: { data }
+        }
+    }
+    catch(e) {
+        console.log(e)
+    }
+}
+
+export default function Index({ data }: any) {
 
     const routa = useRouter()
     const creds = useSelector((state: RootState) => state.login.creds)
     const token = useSelector((state: RootState) => state.login.token)
     const disp = useDispatch()
     const consumer = useSelector((state: RootState) => state.login.consumer)
+    const [down, setDown] = useState(false)
 
     useEffect(() => {
         if(creds === null) {
@@ -61,7 +78,7 @@ export default function Index() {
                 </Flex>
 
                 <Flex gap="md" justify="center" align="center">
-                    <Button variant="subtle" size="md" color="dark" leftIcon={<IconCategory />}>
+                    <Button onClick={() => setDown(!down)} variant="subtle" size="md" color="dark" leftIcon={<IconCategory />}>
                         Products
                     </Button>
                     <Button variant="subtle" size="md" color="dark" leftIcon={<IconSchema />}>
@@ -76,11 +93,13 @@ export default function Index() {
                 </Input.Wrapper>
 
                 <Flex gap="md" justify="center" align="center">
-                    <IconHeart />
-                    <IconShoppingCart />
-                    <IconUser />
+                    <IconHeart style={{ cursor: 'pointer' }} />
+                    <IconShoppingCart style={{ cursor: 'pointer' }} />
+                    <IconUser style={{ cursor: 'pointer' }} />
                 </Flex>
             </Flex>
+
+            <Megamenu down={down} state={setDown} categories={data} />
         </Container>
     )
 }

@@ -15,8 +15,15 @@ export default function Login() {
     const creds = useSelector((state: RootState) => state.login.creds)
 
     useEffect(() => {
+
+        let mount = true
+
         if(creds !== null) {
             routa.push('/dash')
+        }
+
+        return() => {
+            mount = false
         }
     }, [])
 
